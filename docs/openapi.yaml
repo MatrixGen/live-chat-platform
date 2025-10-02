@@ -1,0 +1,30 @@
+openapi: 3.0.0
+info:
+  title: Live Chat Platform API
+  description: Flexible REST API for real-time messaging
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@chatplatform.com
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.chatplatform.com/v1
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    ValidationError:
+      description: Request validation failed
+
+paths:
+  # We'll split these into separate files

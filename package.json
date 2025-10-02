@@ -9,7 +9,8 @@
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "sync": "scripts/sync-databases.js"
   },
   "keywords": [
     "live-chat",
@@ -29,13 +30,19 @@
     "pg-hstore": "^2.3.4",
     "redis": "^5.8.3",
     "sequelize": "^6.37.7",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "cross-env": "^10.1.0",
     "jest": "^30.2.0",
     "morgan": "^1.10.1",
     "nodemon": "^3.1.10",
+    "sequelize-cli": "^6.6.3",
     "supertest": "^7.1.4"
   },
   "overrides": {
