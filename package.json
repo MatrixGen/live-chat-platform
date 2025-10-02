@@ -1,0 +1,44 @@
+{
+  "name": "live-chat-platform",
+  "version": "1.0.0",
+  "main": "index.js",
+  "description": "A flexible live chat API using Node.js, Express, and Socket.io",
+  "author": "Parkstone",
+  "license": "ISC",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "live-chat",
+    "api",
+    "express",
+    "socket.io"
+  ],
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
+    "redis": "^5.8.3",
+    "sequelize": "^6.37.7",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
+  },
+  "overrides": {
+    "glob": "^10.4.5"
+  }
+}
