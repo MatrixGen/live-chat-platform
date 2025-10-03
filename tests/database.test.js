@@ -2,7 +2,9 @@ const { sequelize, User, Channel, Message, ChannelMember } = require('../models'
 
 describe('Database Setup', () => {
   beforeAll(async () => {
+    // Connect and reset DB before running tests
     await sequelize.authenticate();
+    await sequelize.sync({ force: true }); // drop + recreate tables
   });
 
   afterAll(async () => {
@@ -32,7 +34,7 @@ describe('Database Setup', () => {
       username: 'testuser',
       passwordHash: 'hashedpassword123',
     });
-    
+
     expect(user.id).toBeDefined();
     expect(user.email).toBe('test@example.com');
     expect(user.username).toBe('testuser');

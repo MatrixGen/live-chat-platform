@@ -4,7 +4,7 @@ const config = require('../config/config.json')[process.env.NODE_ENV || 'develop
 const sequelize = new Sequelize(config.database, config.username, config.password, {
   host: config.host,
   dialect: config.dialect,
-  logging: config.logging || false ||console.log,
+  logging: config.logging || false,
   pool: {
     max: 10,
     min: 0,
