@@ -1,17 +1,8 @@
-// index.js
-const app = require('./src/app');
+// index.js - Main entrypoint
+// Loads environment variables and starts the server
 
-const PORT = process.env.PORT || 3000;
+require('dotenv').config(); // Load .env variables
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-});
-
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔌 WebSocket server ready`);
-});
-
+// Start the server
+// server.js handles HTTP server, Socket.IO, Redis, and app listening
+require('./src/server');

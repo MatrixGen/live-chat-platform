@@ -1,0 +1,30 @@
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+const app = require('./app');
+const { setupSocket } = require('./socket/socketHandler');
+
+const PORT = process.env.PORT || 3000;
+const instanceId = process.env.SERVER_INSTANCE_ID || `instance-${Date.now()}`;
+
+console.log(`🚀 Starting server instance: ${instanceId}`);
+
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    methods: ["GET", "POST"]
+  },
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    skipMiddlewares: true,
+  }
+});
+
+setupSocket(io);
+
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Server instance ${instanceId} running on port ${PORT}`);
+  console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV}`);
+});

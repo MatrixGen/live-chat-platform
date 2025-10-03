@@ -1,19 +1,21 @@
 const request = require('supertest');
-const app = require('../src/app');
 const { sequelize, User } = require('../models');
+const app = require('../src/app'); // Express app only, no server.listen()
 
 describe('Authentication', () => {
   beforeAll(async () => {
+    // Ensure DB connection and fresh schema
     await sequelize.authenticate();
-    await sequelize.sync({ force: true }); // make sure DB is fresh before all tests
+    await sequelize.sync({ force: true });
   });
 
   beforeEach(async () => {
-    // Truncate users to avoid duplicate emails between tests
+    // Truncate users to avoid duplicates
     await User.destroy({ where: {}, truncate: true, cascade: true, restartIdentity: true });
   });
 
   afterAll(async () => {
+    // Close DB connection
     await sequelize.close();
   });
 
@@ -35,7 +37,7 @@ describe('Authentication', () => {
   });
 
   it('should login with valid credentials', async () => {
-    // Register first
+    // First, register the user
     await request(app)
       .post('/api/v1/auth/register')
       .send({
