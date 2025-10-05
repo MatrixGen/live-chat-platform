@@ -7,6 +7,7 @@ const getUserChannels = async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
 
+    // 1️⃣ Fetch channels where the user is a member
     const channels = await Channel.findAll({
       include: [
         {
@@ -20,31 +21,38 @@ const getUserChannels = async (req, res) => {
           model: User,
           as: 'creator',
           attributes: ['id', 'username', 'profilePicture']
-        },
-        {
-          model: Message,
-          as: 'messages',
-          attributes: ['id', 'content', 'createdAt'],
-          limit: 1,
-          order: [['createdAt', 'DESC']],
-          include: [{
-            model: User,
-            as: 'user',
-            attributes: ['username']
-          }]
         }
       ],
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['updatedAt', 'DESC']]
+      
     });
 
+    // 2️⃣ Fetch latest message for each channel
+    const channelWithLatestMessages = await Promise.all(
+      channels.map(async (channel) => {
+        const latestMessage = await Message.findOne({
+          where: { channelId: channel.id },
+          include: [{ model: User, as: 'user', attributes: ['id', 'username', 'profilePicture'] }],
+          order: [['createdAt', 'DESC']]
+        });
+
+        return {
+          ...channel.get({ plain: true }),
+          latestMessage: latestMessage ? latestMessage.get({ plain: true }) : null
+        };
+      })
+    );
+
+    // 3️⃣ Respond
     res.json(
       successResponse(
-        { channels },
+        { channels: channelWithLatestMessages },
         'Channels retrieved successfully'
       )
     );
+
   } catch (error) {
     console.error('Get channels error:', error);
     res.status(500).json(
@@ -54,6 +62,7 @@ const getUserChannels = async (req, res) => {
 };
 
 const createChannel = async (req, res) => {
+  
   try {
     const { name, description, type, isPrivate, participantIds = [] } = req.body;
 

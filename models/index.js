@@ -22,6 +22,9 @@ const db = {
   Message: require('./message')(sequelize, Sequelize.DataTypes),
   ReadReceipt: require('./readreceipt')(sequelize, Sequelize.DataTypes),
   Attachment: require('./attachment')(sequelize, Sequelize.DataTypes),
+  Report: require('./report')(sequelize, Sequelize.DataTypes),
+  UserBlock: require('./userblock')(sequelize, Sequelize.DataTypes),
+  UserViolation: require('./userviolation')(sequelize, Sequelize.DataTypes),
 };
 
 // Set up associations

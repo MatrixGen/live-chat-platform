@@ -4,7 +4,7 @@ describe('Database Setup', () => {
   beforeAll(async () => {
     // Connect and reset DB before running tests
     await sequelize.authenticate();
-    await sequelize.sync({ force: true }); // drop + recreate tables
+    //await sequelize.sync({ force: true }); // drop + recreate tables
   });
 
   afterAll(async () => {

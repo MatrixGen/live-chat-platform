@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { register, login, refreshToken, logout } = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
+const { validate, authValidation } = require('../middleware/validation');
 
 /**
  * @swagger
@@ -35,7 +36,7 @@ const { authenticateToken } = require('../middleware/auth');
  *       409:
  *         description: User already exists
  */
-router.post('/register', register);
+router.post('/register', validate(authValidation.register), register);
 
 /**
  * @swagger
@@ -64,7 +65,7 @@ router.post('/register', register);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/login', login);
+router.post('/login', validate(authValidation.login), login);
 
 /**
  * @swagger
@@ -89,7 +90,7 @@ router.post('/login', login);
  *       403:
  *         description: Invalid refresh token
  */
-router.post('/refresh', refreshToken);
+router.post('/refresh',validate(authValidation.refreshToken), refreshToken);
 
 /**
  * @swagger

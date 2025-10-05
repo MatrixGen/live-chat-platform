@@ -6,7 +6,7 @@ describe('Authentication', () => {
   beforeAll(async () => {
     // Ensure DB connection and fresh schema
     await sequelize.authenticate();
-    await sequelize.sync({ force: true });
+    //await sequelize.sync({ force: true });
   });
 
   beforeEach(async () => {

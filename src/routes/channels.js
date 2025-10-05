@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const channelController = require('../controllers/channelController');
+const { validate, channelValidation } = require('../middleware/validation');
 
 /**
  * @swagger
@@ -64,8 +65,8 @@ router.get('/', authenticateToken, channelController.getUserChannels);
  *       201:
  *         description: Channel created
  */
-router.post('/', authenticateToken, channelController.createChannel);
 
+router.post('/', authenticateToken, validate(channelValidation.create), channelController.createChannel);
 /**
  * @swagger
  * /channels/{channelId}:

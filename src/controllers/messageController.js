@@ -1,5 +1,6 @@
 const { Message, Channel, User, ChannelMember, ReadReceipt } = require('../../models');
 const { successResponse, errorResponse } = require('../middleware/responseFormatter');
+const contentModerator = require('../utils/profanityFilter');
 
 const getChannelMessages = async (req, res) => {
   try {
@@ -62,10 +63,19 @@ const getChannelMessages = async (req, res) => {
   }
 };
 
+
+// Updated sendMessage function
 const sendMessage = async (req, res) => {
   try {
     const { channelId } = req.params;
     const { content, replyTo } = req.body;
+
+    // Check if user is muted
+    if (contentModerator.isUserMuted(req.user.id)) {
+      return res.status(423).json(
+        errorResponse('You are temporarily muted for violating community guidelines', 'USER_MUTED')
+      );
+    }
 
     // Check if user is member of channel
     const membership = await ChannelMember.findOne({
@@ -78,13 +88,26 @@ const sendMessage = async (req, res) => {
       );
     }
 
-    // Create message
+    // Scan message content
+    const moderationResult = contentModerator.scanMessage(content, req.user.id);
+
+    if (moderationResult.shouldBlock) {
+      return res.status(422).json(
+        errorResponse('Message contains prohibited content', 'CONTENT_BLOCKED', {
+          violations: moderationResult.violations
+        })
+      );
+    }
+
+    // Create message with filtered content if needed
     const message = await Message.create({
-      content,
+      content: moderationResult.filteredContent,
       channelId,
       userId: req.user.id,
       replyTo: replyTo || null,
-      type: 'text'
+      type: 'text',
+      isModerated: !moderationResult.isClean,
+      moderationFlags: moderationResult.violations
     });
 
     // Load message with user data
@@ -103,7 +126,13 @@ const sendMessage = async (req, res) => {
 
     res.status(201).json(
       successResponse(
-        { message: messageWithUser },
+        { 
+          message: messageWithUser,
+          moderation: {
+            wasFiltered: !moderationResult.isClean,
+            violations: moderationResult.violations
+          }
+        },
         'Message sent successfully'
       )
     );

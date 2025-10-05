@@ -1,14 +1,25 @@
 const jwt = require('jsonwebtoken');
 
+// Ensure environment variables are set
+if (!process.env.JWT_SECRET) {
+  console.warn('JWT_SECRET not set, using fallback for development');
+  process.env.JWT_SECRET = 'dev-jwt-secret-fallback';
+}
+
+if (!process.env.JWT_REFRESH_SECRET) {
+  console.warn('JWT_REFRESH_SECRET not set, using fallback for development');
+  process.env.JWT_REFRESH_SECRET = 'dev-refresh-secret-fallback';
+}
+
 const generateAccessToken = (user) => {
   return jwt.sign(
     { 
       userId: user.id, 
       email: user.email,
-      username: user.username 
+      username: user.username
     },
     process.env.JWT_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: '24h' }
   );
 };
 

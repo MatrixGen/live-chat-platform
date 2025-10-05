@@ -48,6 +48,14 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.NOW,
       },
+      isModerator: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
+      isAdmin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
     });
 
     // Add indexes for performance

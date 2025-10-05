@@ -1,34 +1,54 @@
+// src/app.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const { swaggerUi, specs } = require('./config/swagger');
-const rateLimiters = require('./middleware/rateLimiter');
 require('dotenv').config();
+
+// Swagger
+const { swaggerUi, specs } = require('./config/swagger');
+
+// Security middleware
+const {
+  corsOptions,
+  securityHeaders,
+  mongoSanitize,
+  xss,
+  hppProtection,
+  generalLimiter,
+  authLimiter,
+  messageLimiter
+} = require('./middleware/security');
 
 const app = express();
 
 // =====================
-// Middleware
+// Global Middleware
 // =====================
-app.use(helmet());
-app.use(cors());
-app.use(morgan('combined'));
+app.use(helmet());                   // Security headers
+app.use(cors(corsOptions));          // CORS
+app.use(morgan('combined'));         // Logging
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// =====================
-// Rate limiting
-// =====================
-// Only apply rate limiters if not testing
-if (process.env.NODE_ENV !== 'test') {
-  app.use(rateLimiters.api);
-  app.use('/api/v1/auth', rateLimiters.auth);
-  app.use('/api/v1/messages', rateLimiters.messages);
-}
+// Extra security
+app.use(mongoSanitize());            // Prevent NoSQL injection
+app.use(xss());                      // Prevent XSS
+app.use(hppProtection);              // Prevent HTTP parameter pollution
 
 // =====================
-// Health check
+// Rate Limiting
+// =====================
+// Apply general rate limiting to all routes
+app.use(generalLimiter);
+
+// Apply specific rate limiters
+app.use('/api/v1/auth/login', authLimiter);
+app.use('/api/v1/auth/register', authLimiter);
+app.use('/api/v1/messages', messageLimiter);
+
+// =====================
+// Health Check
 // =====================
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -51,6 +71,7 @@ app.use('/api/v1/auth', require('./routes/auth'));
 app.use('/api/v1/users', require('./routes/users'));
 app.use('/api/v1/channels', require('./routes/channels'));
 app.use('/api/v1/messages', require('./routes/messages'));
+app.use('/api/v1/moderation', require('./routes/moderation'));
 
 // =====================
 // 404 Handler
@@ -63,7 +84,8 @@ app.use('*', (req, res) => {
       message: 'Route not found'
     },
     meta: {
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      path: req.originalUrl
     }
   });
 });
@@ -72,12 +94,26 @@ app.use('*', (req, res) => {
 // Error Handler
 // =====================
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error stack:', err.stack);
+  
+  // Handle rate limit errors
+  if (err.status === 429) {
+    return res.status(429).json({
+      success: false,
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many requests, please try again later.'
+      }
+    });
+  }
+
   res.status(500).json({
     success: false,
     error: {
       code: 'INTERNAL_ERROR',
-      message: 'Internal Server Error'
+      message: process.env.NODE_ENV === 'production' 
+        ? 'Internal Server Error' 
+        : err.message
     },
     meta: {
       timestamp: new Date().toISOString()

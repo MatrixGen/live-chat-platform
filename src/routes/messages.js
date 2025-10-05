@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const messageController = require('../controllers/messageController');
+const { xss } = require('../middleware/security');
+
 
 /**
  * @swagger
@@ -68,7 +70,13 @@ router.get('/:channelId/messages', authenticateToken, messageController.getChann
  *       201:
  *         description: Message sent
  */
-router.post('/:channelId/messages', authenticateToken, messageController.sendMessage);
+router.post(
+  '/:channelId/messages',
+  authenticateToken,
+  xss(), // sanitize input
+  messageController.sendMessage
+);
+
 
 /**
  * @swagger
