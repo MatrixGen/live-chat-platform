@@ -7,7 +7,7 @@ const { xss } = require('../middleware/security');
 
 /**
  * @swagger
- * /channels/{channelId}/messages:
+ * /messages/{channelId}/messages:
  *   get:
  *     summary: Get channel messages
  *     tags: [Messages]
@@ -40,7 +40,7 @@ router.get('/:channelId/messages', authenticateToken, messageController.getChann
 
 /**
  * @swagger
- * /channels/{channelId}/messages:
+ * /messages/{channelId}/messages:
  *   post:
  *     summary: Send a message
  *     tags: [Messages]
@@ -80,7 +80,7 @@ router.post(
 
 /**
  * @swagger
- * /channels/{channelId}/messages/read:
+ * /messages/{channelId}/messages/read:
  *   post:
  *     summary: Mark messages as read
  *     tags: [Messages]

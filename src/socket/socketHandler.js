@@ -1,5 +1,5 @@
 const { verifyAccessToken } = require('../utils/tokens');
-const { User, Channel, ChannelMember } = require('../../models');
+const { User, Channel, ChannelMember,Message } = require('../../models');
 const redisService = require('../services/redisService');
 const presenceService = require('../services/presenceService');
 const { createAdapter } = require('@socket.io/redis-adapter');

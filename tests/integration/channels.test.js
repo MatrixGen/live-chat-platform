@@ -89,7 +89,7 @@ describe('Channels API', () => {
       const response = await request(app)
         .post('/api/v1/channels')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({}) // Invalid data
+        .send({}) 
         .expect(400);
 
       expect(response.body.success).toBe(false);
@@ -104,7 +104,7 @@ describe('Channels API', () => {
       channel = await Channel.create({
         name: 'Join Test Channel',
         type: 'group',
-        createdBy: user2.id // Different user creates channel
+        createdBy: user2.id 
       });
     });
 

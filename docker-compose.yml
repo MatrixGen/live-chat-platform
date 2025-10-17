@@ -1,0 +1,75 @@
+#version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: live-chat-dev
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=live_chat_dev
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app               # 👈 live mount your source code
+      - /app/node_modules    # 👈 keep container node_modules isolated
+    command: npm run dev     # 👈 make sure this runs nodemon
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - chat-network
+    healthcheck:             # 👈 optional healthcheck for better docker status
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api-docs"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: live-chat-postgres
+    environment:
+      - POSTGRES_DB=live_chat_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - chat-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: live-chat-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - chat-network
+
+  adminer:
+    image: adminer
+    container_name: live-chat-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - chat-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  chat-network:
+    driver: bridge

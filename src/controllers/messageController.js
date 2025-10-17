@@ -146,38 +146,73 @@ const sendMessage = async (req, res) => {
 
 const markAsRead = async (req, res) => {
   try {
-    const { messageIds } = req.body;
+    const { messageIds = [] } = req.body; // ✅ Default to empty array
     const { channelId } = req.params;
 
-    // Create read receipts
+    // 🔐 Validate channel membership
+    const membership = await ChannelMember.findOne({
+      where: { channelId, userId: req.user.id }
+    });
+
+    if (!membership) {
+      return res.status(403).json(
+        errorResponse('You are not a member of this channel', 'FORBIDDEN')
+      );
+    }
+
+    // 🧩 Defensive: must be array
+    if (!Array.isArray(messageIds)) {
+      return res.status(400).json(
+        errorResponse('messageIds must be an array', 'INVALID_REQUEST')
+      );
+    }
+
+    // 📨 If no messageIds, just update lastReadAt
+    if (messageIds.length === 0) {
+      await ChannelMember.update(
+        { lastReadAt: new Date() },
+        { where: { channelId, userId: req.user.id } }
+      );
+
+      return res.json(
+        successResponse(
+          { readReceipts: [] },
+          'No messageIds provided; updated last read timestamp'
+        )
+      );
+    }
+
+    // ✅ Create read receipts safely
     const readReceipts = await Promise.all(
-      messageIds.map(messageId =>
-        ReadReceipt.findOrCreate({
+      messageIds.map(async (messageId) => {
+        const [receipt] = await ReadReceipt.findOrCreate({
           where: { messageId, userId: req.user.id },
           defaults: { messageId, userId: req.user.id }
-        })
-      )
+        });
+        return receipt;
+      })
     );
 
-    // Update channel membership last read
+    // 🕓 Update channel membership last read
     await ChannelMember.update(
       { lastReadAt: new Date() },
       { where: { channelId, userId: req.user.id } }
     );
 
-    res.json(
+    return res.json(
       successResponse(
-        { readReceipts: readReceipts.map(([receipt]) => receipt) },
-        'Messages marked as read'
+        { readReceipts },
+        'Messages marked as read successfully'
       )
     );
   } catch (error) {
-    console.error('Mark as read error:', error);
-    res.status(500).json(
-      errorResponse('Failed to mark messages as read', 'MARK_READ_ERROR')
+    console.error('❌ Mark as read error:', error);
+    return res.status(500).json(
+      errorResponse('Failed to mark messages as read', 'MARK_READ_ERROR', { error: error.message })
     );
   }
 };
+
 
 module.exports = {
   getChannelMessages,

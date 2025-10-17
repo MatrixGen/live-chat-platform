@@ -6,8 +6,8 @@
   "author": "Parkstone",
   "license": "ISC",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/app.js",
+    "start": "node index.js",
+    "dev": "nodemon src/index.js",
     "sync": "scripts/sync-databases.js",
     "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles",
     "test:watch": "cross-env NODE_ENV=test jest --watch",
@@ -15,7 +15,17 @@
     "test:unit": "cross-env NODE_ENV=test jest tests/unit/",
     "test:integration": "cross-env NODE_ENV=test jest tests/integration/",
     "test:load": "artillery run tests/load/chat-load.yml",
-    "test:load:report": "artillery run --output tests/load/report.json tests/load/chat-load.yml && artillery report tests/load/report.json"
+    "test:load:report": "artillery run --output tests/load/report.json tests/load/chat-load.yml && artillery report tests/load/report.json",
+    "docker:dev": "docker-compose up --build",
+    "docker:dev:detach": "docker-compose up -d --build",
+    "docker:prod": "docker-compose -f docker-compose.prod.yml up --build",
+    "docker:prod:detach": "docker-compose -f docker-compose.prod.yml up -d --build",
+    "docker:down": "docker-compose down",
+    "docker:clean": "docker system prune -f",
+    "docker:logs": "docker-compose logs -f",
+    "test:ci": "npm run test:unit && npm run test:integration",
+    "lint": "eslint src/ tests/ --ext .js",
+    "lint:fix": "eslint src/ tests/ --ext .js --fix"
   },
   "keywords": [
     "live-chat",

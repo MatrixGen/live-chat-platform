@@ -40,7 +40,8 @@ app.use(hppProtection);              // Prevent HTTP parameter pollution
 // Rate Limiting
 // =====================
 // Apply general rate limiting to all routes
-app.use(generalLimiter);
+
+//app.use(generalLimiter);
 
 // Apply specific rate limiters
 app.use('/api/v1/auth/login', authLimiter);

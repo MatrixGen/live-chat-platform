@@ -12,7 +12,11 @@ const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin:[
+      'http://192.168.132.201:5173/',
+       "http://localhost:3000"
+    ], 
+                  
     methods: ["GET", "POST"]
   },
   connectionStateRecovery: {
